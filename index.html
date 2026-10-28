@@ -1,11 +1,2294 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    
-</body>
+<!doctype html>
+<html lang="th" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LTax Auto | โปรแกรมจัดการ LTAX Online อัตโนมัติ สำหรับ อปท.</title>
+    <meta
+      name="description"
+      content="LTax Auto ซอฟต์แวร์ช่วยนำเข้าและจัดการข้อมูลภาษีที่ดินและสิ่งปลูกสร้างบนระบบ LTAX Online โดยอัตโนมัติ รวดเร็ว แม่นยำ ปลอดภัย 100% สำหรับ อปท. เทศบาล และ อบต."
+    />
+    <link rel="icon" type="image/png" href="assets/favicon.png" />
+
+    <!-- Google Fonts: Prompt & Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Tailwind CSS (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              navy: {
+                DEFAULT: "#0E1853",
+                50: "#F0F3FA",
+                100: "#D9E0F3",
+                500: "#1B2C8A",
+                800: "#0E1853",
+                900: "#080E33",
+                950: "#050921",
+              },
+              orange: {
+                DEFAULT: "#F16D31",
+                50: "#FEF4F0",
+                100: "#FDE4DA",
+                400: "#FF996A",
+                500: "#F16D31",
+                600: "#DC5416",
+                700: "#BA3E09",
+              },
+              skybrand: {
+                DEFAULT: "#BCE1F0",
+                50: "#F4FAFD",
+                100: "#E5F3FA",
+                200: "#BCE1F0",
+                300: "#8ACAE5",
+                500: "#3499C6",
+              },
+              peach: {
+                DEFAULT: "#FF996A",
+                light: "#FFB897",
+              },
+            },
+            fontFamily: {
+              sans: ['"Prompt"', '"Plus Jakarta Sans"', "sans-serif"],
+              mono: ['"JetBrains Mono"', "ui-monospace", "monospace"],
+            },
+            boxShadow: {
+              isometric:
+                "0 20px 40px -15px rgba(14, 24, 83, 0.15), 0 0 0 1px rgba(14, 24, 83, 0.05)",
+              "isometric-lg":
+                "0 30px 60px -20px rgba(14, 24, 83, 0.22), 0 0 0 1px rgba(14, 24, 83, 0.08)",
+              "glow-orange": "0 10px 30px -5px rgba(241, 109, 49, 0.35)",
+              "glow-sky": "0 10px 30px -5px rgba(188, 225, 240, 0.5)",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      /* Base typography & aesthetics */
+      body {
+        font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+        color: #0e1853;
+        background-color: #f8fafd;
+        overflow-x: hidden;
+      }
+
+      /* Isometric grid pattern */
+      .bg-iso-grid {
+        background-image: radial-gradient(
+          circle at 1px 1px,
+          rgba(14, 24, 83, 0.06) 1px,
+          transparent 0
+        );
+        background-size: 32px 32px;
+      }
+
+      /* Isometric card tilt styling */
+      .isometric-viewport {
+        perspective: 1200px;
+      }
+
+      .isometric-board {
+        transform: rotateX(24deg) rotateZ(-18deg) rotateY(4deg);
+        transform-style: preserve-3d;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .isometric-board:hover {
+        transform: rotateX(18deg) rotateZ(-12deg) rotateY(2deg);
+      }
+
+      /* Floating parallax keyframes */
+      @keyframes subtleFloat {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+
+      .animate-float {
+        animation: subtleFloat 5s ease-in-out infinite;
+      }
+
+      .animate-float-delayed {
+        animation: subtleFloat 6s ease-in-out 2s infinite;
+      }
+
+      /* Respect accessibility reduced motion */
+      @media (prefers-reduced-motion: reduce) {
+        .animate-float,
+        .animate-float-delayed {
+          animation: none !important;
+        }
+        .isometric-board {
+          transform: none !important;
+        }
+        .scroll-smooth {
+          scroll-behavior: auto !important;
+        }
+      }
+
+      /* Custom scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f0f3fa;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #bce1f0;
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #8acae5;
+      }
+    </style>
+  </head>
+  <body
+    class="bg-[#F8FAFD] antialiased selection:bg-orange selection:text-white"
+  >
+    <!-- Top Notice Banner -->
+    <div
+      class="bg-navy text-white text-xs py-2 px-4 border-b border-navy-500/30"
+    >
+      <div
+        class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2"
+      >
+        <div class="flex items-center gap-2">
+          <span
+            class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange text-white"
+          >
+            License
+          </span>
+          <span class="text-slate-200"
+            >ซอฟต์แวร์ช่วยปฏิบัติงานภาษีที่ดินและสิ่งปลูกสร้าง สำหรับ อปท. /
+            เทศบาล / อบต. ทั่วประเทศ</span
+          >
+        </div>
+        <div class="flex items-center gap-4 text-slate-300">
+          <a
+            href="#key-request"
+            class="hover:text-orange-400 transition-colors duration-200 flex items-center gap-1"
+          >
+            <svg
+              class="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+              />
+            </svg>
+            ขอใบเสนอราคา / สั่งซื้อ License Key
+          </a>
+          <span class="text-slate-600">|</span>
+          <a
+            href="#contact"
+            class="hover:text-skybrand-300 transition-colors duration-200 flex items-center gap-1"
+          >
+            <svg
+              class="w-3.5 h-3.5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+              />
+            </svg>
+            089-637-1916
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Floating Navigation Bar -->
+    <header class="sticky top-4 z-40 px-4 max-w-7xl mx-auto">
+      <nav
+        class="bg-white/95 backdrop-blur-md border border-slate-200/80 rounded-2xl shadow-isometric px-5 py-3 flex items-center justify-between transition-all duration-300"
+      >
+        <!-- Brand Logo -->
+        <a
+          href="#"
+          class="flex items-center gap-3 group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-orange rounded-lg"
+        >
+          <img
+            src="assets/logo.png"
+            alt="LTax Auto Logo"
+            class="w-10 h-10 object-contain rounded-lg"
+          />
+          <div class="flex flex-col">
+            <div class="flex items-center gap-1">
+              <span class="text-xl font-bold tracking-tight text-navy"
+                >LTax</span
+              >
+              <span
+                class="text-xl font-bold tracking-tight text-orange flex items-center"
+              >
+                Auto
+                <svg
+                  class="w-4 h-4 ml-0.5 text-orange animate-pulse"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+              </span>
+            </div>
+            <span
+              class="text-[10px] font-medium tracking-wide uppercase text-slate-500"
+              >By I-GIS-MAP</span
+            >
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <div
+          class="hidden md:flex items-center gap-8 text-sm font-medium text-navy/80"
+        >
+          <a
+            href="#features"
+            class="hover:text-orange transition-colors duration-200 cursor-pointer"
+            >ฟีเจอร์เด่น</a
+          >
+          <a
+            href="#workflow"
+            class="hover:text-orange transition-colors duration-200 cursor-pointer"
+            >ขั้นตอนการทำงาน</a
+          >
+          <a
+            href="#downloads"
+            class="hover:text-orange transition-colors duration-200 cursor-pointer"
+            >ดาวน์โหลด</a
+          >
+          <a
+            href="#key-request"
+            class="hover:text-orange transition-colors duration-200 cursor-pointer"
+            >สั่งซื้อ License</a
+          >
+          <a
+            href="#faq"
+            class="hover:text-orange transition-colors duration-200 cursor-pointer"
+            >คำถามที่พบบ่อย</a
+          >
+          <a
+            href="#contact"
+            class="hover:text-orange transition-colors duration-200 cursor-pointer"
+            >ติดต่อเรา</a
+          >
+        </div>
+
+        <!-- Action CTA Buttons -->
+        <div class="flex items-center gap-3">
+          <a
+            href="https://facebook.com/I.Gis.Map.Traning"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-navy bg-slate-100 hover:bg-slate-200 rounded-xl transition-colors duration-200 border border-slate-200 cursor-pointer"
+            title="facebook page"
+          >
+            <svg class="w-4 h-4" viewBox="0 0 24 24">
+                        <path
+                          d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                        />
+                      </svg>
+            <span>fb.com/I-GIS-MAP</span>
+          </a>
+          <a
+            href="#downloads"
+            class="inline-flex items-center gap-2 px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-orange hover:bg-orange-600 rounded-xl shadow-glow-orange transition-all duration-200 cursor-pointer"
+          >
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+              />
+            </svg>
+            <span>ดาวน์โหลดโปรแกรม</span>
+          </a>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Hero Section with Isometric & Parallax Canvas -->
+    <section
+      class="relative pt-12 pb-20 md:pt-20 md:pb-32 bg-iso-grid overflow-hidden"
+    >
+      <!-- Parallax Background Glow Circles -->
+      <div
+        data-parallax-speed="0.05"
+        class="parallax-layer pointer-events-none absolute -top-24 -left-24 w-96 h-96 bg-skybrand/40 rounded-full blur-3xl opacity-70"
+      ></div>
+      <div
+        data-parallax-speed="-0.08"
+        class="parallax-layer pointer-events-none absolute top-1/3 -right-24 w-80 h-80 bg-peach/30 rounded-full blur-3xl opacity-60"
+      ></div>
+      <div
+        data-parallax-speed="0.03"
+        class="parallax-layer pointer-events-none absolute bottom-10 left-1/2 -translate-x-1/2 w-3/4 h-64 bg-skybrand-100/50 rounded-full blur-3xl"
+      ></div>
+
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div
+          class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center"
+        >
+          <!-- Left: Headline & Call To Action -->
+          <div class="lg:col-span-7 flex flex-col items-start">
+            <!-- Trust Tag -->
+            <div
+              class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-navy/5 border border-navy/15 text-navy text-xs font-semibold mb-6"
+            >
+              <span
+                class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"
+              ></span>
+              <span class="w-2 h-2 rounded-full bg-emerald-500 -ml-4"></span>
+              <span>ซอฟต์แวร์ช่วยงาน อปท. / รันในเครื่องปลอดภัย 100%</span>
+            </div>
+
+            <h1
+              class="text-3xl sm:text-4xl md:text-5xl lg:text-[44px] font-bold tracking-tight text-navy leading-[1.2] mb-6"
+            >
+              โปรแกรมบอทช่วยนำเข้าข้อมูล <br />
+              <span
+                class="text-transparent bg-clip-text bg-gradient-to-r from-orange to-peach"
+                >LTAX Online อัตโนมัติ</span
+              >
+              <br />
+              แม่นยำ ไม่ต้องนั่งคีย์ทีละรายการ
+            </h1>
+
+            <p
+              class="text-base sm:text-lg text-slate-600 font-normal leading-relaxed mb-8 max-w-2xl"
+            >
+              เปลี่ยนงานคีย์ข้อมูลภาษีที่ดินและสิ่งปลูกสร้างของ อปท.
+              ที่ต้องใช้เวลาหลายสัปดาห์ ให้เสร็จได้ในไม่กี่คลิก ด้วยโปรแกรม RPA
+              ช่วยบันทึกข้อมูลจากไฟล์ Excel เข้าระบบ LTAX Online โดยตรง
+              ลดความผิดพลาด
+              ประหยัดงบประมาณและเวลาทำงานของเจ้าหน้าที่ฝ่ายจัดเก็บรายได้
+            </p>
+
+            <!-- CTA Action Group -->
+            <div
+              class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full sm:w-auto mb-10"
+            >
+              <a
+                href="#downloads"
+                class="inline-flex items-center justify-center gap-2.5 px-6 py-3.5 text-base font-semibold text-white bg-orange hover:bg-orange-600 rounded-xl shadow-glow-orange transition-all duration-200 cursor-pointer"
+              >
+                <svg
+                  class="w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                  />
+                </svg>
+                <span>ดาวน์โหลดตัวโปรแกรม</span>
+              </a>
+              <a
+                href="#key-request"
+                class="inline-flex items-center justify-center gap-2 px-6 py-3.5 text-base font-semibold text-navy bg-white hover:bg-slate-50 border-2 border-navy/20 hover:border-navy/50 rounded-xl transition-all duration-200 shadow-sm cursor-pointer"
+              >
+                <svg
+                  class="w-5 h-5 text-orange"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
+                  />
+                </svg>
+                <span>สั่งซื้อ / ขอใบเสนอราคา License</span>
+              </a>
+            </div>
+
+            <!-- Key Stats / Value Pillars -->
+            <div
+              class="grid grid-cols-3 gap-4 pt-6 border-t border-slate-200 w-full max-w-xl"
+            >
+              <div>
+                <div
+                  class="text-2xl sm:text-3xl font-extrabold text-navy font-mono"
+                >
+                  15x+
+                </div>
+                <div class="text-xs text-slate-500 font-medium mt-0.5">
+                  เร็วกว่าคีย์ข้อมูลด้วยมือ
+                </div>
+              </div>
+              <div>
+                <div
+                  class="text-2xl sm:text-3xl font-extrabold text-navy font-mono"
+                >
+                  100%
+                </div>
+                <div class="text-xs text-slate-500 font-medium mt-0.5">
+                  ออฟไลน์ ปลอดภัยในเครื่อง
+                </div>
+              </div>
+              <div>
+                <div
+                  class="text-2xl sm:text-3xl font-extrabold text-orange font-mono"
+                >
+                  License
+                </div>
+                <div class="text-xs text-slate-500 font-medium mt-0.5">
+                  ดูแลระบบ & ซัพพอร์ตตลอดอายุการใช้งาน
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Isometric Interactive Stage with Parallax Depth -->
+          <div
+            class="lg:col-span-5 isometric-viewport relative flex items-center justify-center py-6"
+          >
+            <!-- Isometric 3D Container -->
+            <div
+              id="isometricHeroCard"
+              class="isometric-board relative w-full max-w-[420px] bg-white rounded-3xl p-6 shadow-isometric-lg border border-slate-200/90 select-none"
+            >
+              <!-- Top status bar -->
+              <div
+                class="flex items-center justify-between pb-4 border-b border-slate-100"
+              >
+                <div class="flex items-center gap-2">
+                  <div class="w-3 h-3 rounded-full bg-red-400"></div>
+                  <div class="w-3 h-3 rounded-full bg-amber-400"></div>
+                  <div class="w-3 h-3 rounded-full bg-emerald-400"></div>
+                  <span
+                    class="ml-2 text-xs font-mono font-medium text-slate-400"
+                    >LTax Auto v1.2.3</span
+                  >
+                </div>
+                <span
+                  class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-100 text-emerald-800"
+                >
+                  License Active
+                </span>
+              </div>
+
+              <!-- Isometric Robot & Pipeline Art -->
+              <div
+                class="my-6 relative bg-gradient-to-br from-navy-50 to-skybrand-100 rounded-2xl p-4 border border-skybrand/60 overflow-hidden"
+              >
+                <!-- Background Grid in Isometric -->
+                <div
+                  class="absolute inset-0 opacity-20 bg-[linear-gradient(to_right,#0E1853_1px,transparent_1px),linear-gradient(to_bottom,#0E1853_1px,transparent_1px)] bg-[size:16px_16px]"
+                ></div>
+
+                <div
+                  class="relative z-10 flex flex-col items-center text-center"
+                >
+                  <!-- Mascot Logo Container with 3D elevation -->
+                  <div
+                    class="w-28 h-28 bg-white rounded-2xl p-2 shadow-isometric border border-slate-100 mb-3 animate-float"
+                  >
+                    <img
+                      src="assets/logo.png"
+                      alt="Robot Helper"
+                      class="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div class="text-xs font-bold text-navy">
+                    LTax Auto RPA Engine
+                  </div>
+                  <div class="text-[11px] text-slate-500">
+                    จำลองการกรอกข้อมูลและตรวจสอบความถูกต้อง
+                  </div>
+                </div>
+
+                <!-- Floating Isometric Tag 1 -->
+                <div
+                  class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-lg px-2.5 py-1 shadow-sm text-[10px] font-semibold text-navy flex items-center gap-1.5 animate-float-delayed"
+                >
+                  <svg
+                    class="w-3.5 h-3.5 text-emerald-600"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>Excel ภ.ด.ส. นำเข้าสำเร็จ</span>
+                </div>
+
+                <!-- Floating Isometric Tag 2 -->
+                <div
+                  class="absolute bottom-3 right-3 bg-white/95 backdrop-blur-sm border border-slate-200 rounded-lg px-2.5 py-1 shadow-sm text-[10px] font-semibold text-orange flex items-center gap-1.5 animate-float"
+                >
+                  <svg
+                    class="w-3.5 h-3.5 text-orange"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M13 10V3L4 14h7v7l9-11h-7z"
+                    />
+                  </svg>
+                  <span>ความเร็วสูงสุด: 20 แปลง/นาที</span>
+                </div>
+              </div>
+
+              <!-- Mini Data Transfer Feed -->
+              <div class="space-y-2 text-[11px] font-mono">
+                <div
+                  class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100"
+                >
+                  <div class="flex items-center gap-2 text-navy">
+                    <svg
+                      class="w-3.5 h-3.5 text-emerald-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <span>แปลงที่ดินเลขที่: 10425 (ม.2)</span>
+                  </div>
+                  <span class="text-emerald-700 font-semibold"
+                    >ซิงค์สำเร็จ</span
+                  >
+                </div>
+                <div
+                  class="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-100"
+                >
+                  <div class="flex items-center gap-2 text-navy">
+                    <svg
+                      class="w-3.5 h-3.5 text-emerald-500"
+                      fill="currentColor"
+                      viewBox="0 0 20 20"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                    <span>สิ่งปลูกสร้าง: บ้านเดี่ยว 2 ชั้น</span>
+                  </div>
+                  <span class="text-emerald-700 font-semibold"
+                    >ซิงค์สำเร็จ</span
+                  >
+                </div>
+                <div
+                  class="flex items-center justify-between p-2 rounded-lg bg-amber-50 border border-amber-200"
+                >
+                  <div class="flex items-center gap-2 text-amber-900">
+                    <svg
+                      class="w-3.5 h-3.5 text-amber-500 animate-spin"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        class="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        stroke-width="4"
+                      ></circle>
+                      <path
+                        class="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8v8H4z"
+                      ></path>
+                    </svg>
+                    <span>กำลังคำนวณภาษีแปลงถัดไป...</span>
+                  </div>
+                  <span class="text-amber-700 font-semibold"
+                    >กำลังประมวลผล</span
+                  >
+                </div>
+              </div>
+
+              <!-- Progress Bar -->
+              <div class="mt-4 pt-3 border-t border-slate-100">
+                <div
+                  class="flex justify-between text-[11px] font-medium text-slate-500 mb-1"
+                >
+                  <span>ความคืบหน้ารายการทั้งหมด</span>
+                  <span class="font-bold text-navy font-mono"
+                    >1,840 / 2,000 รายการ (92%)</span
+                  >
+                </div>
+                <div
+                  class="w-full bg-slate-100 rounded-full h-2 overflow-hidden"
+                >
+                  <div
+                    class="bg-gradient-to-r from-orange to-peach h-2 rounded-full"
+                    style="width: 92%"
+                  ></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparison Section: Before vs After -->
+    <section class="py-16 bg-white border-y border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-14">
+          <span class="text-xs font-bold uppercase tracking-wider text-orange"
+            >การเปรียบเทียบผลลัพธ์</span
+          >
+          <h2 class="text-2xl sm:text-3xl font-bold text-navy mt-2">
+            เหตุผลที่เจ้าหน้าที่ อปท. เลือกใช้ LTax Auto แทนการคีย์มือ
+          </h2>
+          <p class="text-sm sm:text-base text-slate-600 mt-3">
+            ช่วยลดความเหนื่อยล้าจากการจ้องจอและคีย์ซ้ำๆ ลดข้อผิดพลาดทางภาษี
+            พร้อมส่งงานได้ทันกำหนดเวลา
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-stretch">
+          <!-- Old Way Card -->
+          <div
+            class="rounded-2xl border border-red-200 bg-red-50/40 p-6 sm:p-8 flex flex-col justify-between"
+          >
+            <div>
+              <div class="flex items-center gap-3 mb-6">
+                <div
+                  class="w-10 h-10 rounded-xl bg-red-100 text-red-600 flex items-center justify-center font-bold"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-red-900">
+                    วิธีการเดิม (คีย์ข้อมูลทีละรายการ)
+                  </h3>
+                  <p class="text-xs text-red-700">
+                    เสียเวลา เสี่ยงผิดพลาด และเปลืองกำลังคน
+                  </p>
+                </div>
+              </div>
+
+              <ul class="space-y-4 text-sm text-slate-700">
+                <li class="flex items-start gap-3">
+                  <span
+                    class="w-5 h-5 rounded-full bg-red-200 text-red-700 flex items-center justify-center shrink-0 text-xs font-bold mt-0.5"
+                    >✕</span
+                  >
+                  <span
+                    ><strong>ใช้เวลานานนับสัปดาห์:</strong> ต้องเปิดไฟล์ Excel
+                    สลับกับหน้าเว็บ LTAX Online ทีละแปลงทีละรายการ</span
+                  >
+                </li>
+                <li class="flex items-start gap-3">
+                  <span
+                    class="w-5 h-5 rounded-full bg-red-200 text-red-700 flex items-center justify-center shrink-0 text-xs font-bold mt-0.5"
+                    >✕</span
+                  >
+                  <span
+                    ><strong>เสี่ยงพิมพ์ผิดสูง (Human Error):</strong>
+                    เลขบัตรประชาชน เลขที่โฉนด หรือเนื้อที่
+                    ตาล้าพิมพ์ตกหล่น</span
+                  >
+                </li>
+                <li class="flex items-start gap-3">
+                  <span
+                    class="w-5 h-5 rounded-full bg-red-200 text-red-700 flex items-center justify-center shrink-0 text-xs font-bold mt-0.5"
+                    >✕</span
+                  >
+                  <span
+                    ><strong>ระบบค้างหรือเน็ตหลุดต้องเริ่มใหม่:</strong>
+                    ไม่มีการบันทึกสถานะย้อนหลัง ต้องตรวจสอบย้อนหลังเอง</span
+                  >
+                </li>
+                <li class="flex items-start gap-3">
+                  <span
+                    class="w-5 h-5 rounded-full bg-red-200 text-red-700 flex items-center justify-center shrink-0 text-xs font-bold mt-0.5"
+                    >✕</span
+                  >
+                  <span
+                    ><strong>ล้าหลังต่อรอบภาษี:</strong>
+                    เสียเวลาทำงานหลักอย่างอื่นของฝ่ายจัดเก็บรายได้</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- LTax Auto Way Card -->
+          <div
+            class="rounded-2xl border-2 border-emerald-300 bg-emerald-50/40 p-6 sm:p-8 flex flex-col justify-between shadow-isometric"
+          >
+            <div>
+              <div class="flex items-center gap-3 mb-6">
+                <div
+                  class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold"
+                >
+                  <svg
+                    class="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-emerald-950">
+                    ใช้ LTax Auto (ระบบบอทอัตโนมัติ)
+                  </h3>
+                  <p class="text-xs text-emerald-700">
+                    รวดเร็ว ตรวจทานได้ ปลอดภัย และเสร็จตรงเวลา
+                  </p>
+                </div>
+              </div>
+
+              <ul class="space-y-4 text-sm text-slate-800">
+                <li class="flex items-start gap-3">
+                  <span
+                    class="w-5 h-5 rounded-full bg-emerald-200 text-emerald-800 flex items-center justify-center shrink-0 text-xs font-bold mt-0.5"
+                    >✓</span
+                  >
+                  <span
+                    ><strong>รันอัตโนมัติรวดเร็ว:</strong> อัตราเฉลี่ย 100-200
+                    รายการต่อนาที ปล่อยให้โปรแกรมทำงานแทนได้เลย</span
+                  >
+                </li>
+                <li class="flex items-start gap-3">
+                  <span
+                    class="w-5 h-5 rounded-full bg-emerald-200 text-emerald-800 flex items-center justify-center shrink-0 text-xs font-bold mt-0.5"
+                    >✓</span
+                  >
+                  <span
+                    ><strong>มีระบบตรวจสอบความถูกต้อง (Validation):</strong>
+                    เช็กรูปแบบเลขบัตรประชาชน โฉนด และประเภทการใช้ประโยชน์</span
+                  >
+                </li>
+                <li class="flex items-start gap-3">
+                  <span
+                    class="w-5 h-5 rounded-full bg-emerald-200 text-emerald-800 flex items-center justify-center shrink-0 text-xs font-bold mt-0.5"
+                    >✓</span
+                  >
+                  <span
+                    ><strong>บันทึก Log รายแปลง:</strong>
+                    แปลงไหนสำเร็จหรือติดปัญหา โปรแกรมสรุปเป็นไฟล์ Excel
+                    รายงานอย่างชัดเจน</span
+                  >
+                </li>
+                <li class="flex items-start gap-3">
+                  <span
+                    class="w-5 h-5 rounded-full bg-emerald-200 text-emerald-800 flex items-center justify-center shrink-0 text-xs font-bold mt-0.5"
+                    >✓</span
+                  >
+                  <span
+                    ><strong>ทำงานออฟไลน์ 100%:</strong>
+                    ปลอดภัยตามมาตรฐานความมั่นคงปลอดภัยไซเบอร์
+                    ข้อมูลไม่หลุดออกภายนอก</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Key Features Section (Isometric Cards) -->
+    <section id="features" class="py-20 bg-slate-50 relative">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <span class="text-xs font-bold uppercase tracking-wider text-orange"
+            >ฟังก์ชันการทำงานหลัก</span
+          >
+          <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-navy mt-2">
+            ออกแบบมาเพื่อคนทำงาน LTAX Online โดยเฉพาะ
+          </h2>
+          <p class="text-sm sm:text-base text-slate-600 mt-3">
+            ตอบโจทย์ทุกขั้นตอนการเตรียมข้อมูล ภาษีที่ดินและสิ่งปลูกสร้าง
+            (ภ.ด.ส.) ให้ราบรื่นและถูกต้องที่สุด
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <!-- Feature 1 -->
+          <div
+            class="bg-white rounded-2xl p-7 border border-slate-200/90 shadow-sm hover:shadow-isometric transition-all duration-300 group hover:-translate-y-1"
+          >
+            <div
+              class="w-12 h-12 rounded-xl bg-navy/5 text-navy group-hover:bg-navy group-hover:text-white flex items-center justify-center transition-colors duration-200 mb-6"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"
+                />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-navy mb-2">
+              นำเข้าข้อมูลแบบชุด (Batch Processing)
+            </h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              รองรับการนำเข้าไฟล์ Excel ข้อมูลแปลงที่ดิน สิ่งปลูกสร้าง
+              และห้องชุด ครั้งละหลายร้อยหรือหลายพันรายการได้ในคลิกเดียว
+            </p>
+          </div>
+
+          <!-- Feature 2 -->
+          <div
+            class="bg-white rounded-2xl p-7 border border-slate-200/90 shadow-sm hover:shadow-isometric transition-all duration-300 group hover:-translate-y-1"
+          >
+            <div
+              class="w-12 h-12 rounded-xl bg-orange/10 text-orange group-hover:bg-orange group-hover:text-white flex items-center justify-center transition-colors duration-200 mb-6"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-navy mb-2">
+              ตรวจสอบความถูกต้องล่วงหน้า (Pre-Check)
+            </h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              ตรวจเช็ก Checkdigit บัตรประชาชน ความครบถ้วนของข้อมูล
+              และรหัสประเภทก่อนเริ่มรัน ช่วยป้องกันข้อมูลผิดพลาดเข้าฐานข้อมูล
+            </p>
+          </div>
+
+          <!-- Feature 3 -->
+          <div
+            class="bg-white rounded-2xl p-7 border border-slate-200/90 shadow-sm hover:shadow-isometric transition-all duration-300 group hover:-translate-y-1"
+          >
+            <div
+              class="w-12 h-12 rounded-xl bg-skybrand-200/50 text-navy group-hover:bg-skybrand-500 group-hover:text-white flex items-center justify-center transition-colors duration-200 mb-6"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-navy mb-2">
+              ปลอดภัยสูงสุด ทำงานบนเครื่อง 100%
+            </h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              ไม่เก็บหรือส่งผ่านข้อมูลผู้เสียภาษีและทรัพย์สินออกนอกเครื่องคอมพิวเตอร์ของคุณ
+              มั่นใจตามหลักเกณฑ์ พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล (PDPA)
+            </p>
+          </div>
+
+          <!-- Feature 4 -->
+          <div
+            class="bg-white rounded-2xl p-7 border border-slate-200/90 shadow-sm hover:shadow-isometric transition-all duration-300 group hover:-translate-y-1"
+          >
+            <div
+              class="w-12 h-12 rounded-xl bg-navy/5 text-navy group-hover:bg-navy group-hover:text-white flex items-center justify-center transition-colors duration-200 mb-6"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-navy mb-2">
+              ระบบรันต่ออัตโนมัติเมื่อหลุด (Auto-Resume)
+            </h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              หากสัญญาณอินเทอร์เน็ตของหน่วยงานสะดุด
+              โปรแกรมมีระบบจำตำแหน่งรายการล่าสุด
+              สามารถสั่งเริ่มทำงานต่อได้ทันทีโดยไม่ต้องเริ่มใหม่ตั้งแต่แรก
+            </p>
+          </div>
+
+          <!-- Feature 5 -->
+          <div
+            class="bg-white rounded-2xl p-7 border border-slate-200/90 shadow-sm hover:shadow-isometric transition-all duration-300 group hover:-translate-y-1"
+          >
+            <div
+              class="w-12 h-12 rounded-xl bg-orange/10 text-orange group-hover:bg-orange group-hover:text-white flex items-center justify-center transition-colors duration-200 mb-6"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-navy mb-2">
+              รายงานผลและบันทึก Log อย่างละเอียด
+            </h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              ส่งออกรายงานสรุปหลังการนำเข้าเป็นไฟล์ Excel
+              พร้อมระบุแปลงที่สำเร็จและแปลงที่พบข้อผิดพลาดจากระบบเพื่อให้นำไปปรับแก้ได้ง่าย
+            </p>
+          </div>
+
+          <!-- Feature 6 -->
+          <div
+            class="bg-white rounded-2xl p-7 border border-slate-200/90 shadow-sm hover:shadow-isometric transition-all duration-300 group hover:-translate-y-1"
+          >
+            <div
+              class="w-12 h-12 rounded-xl bg-skybrand-200/50 text-navy group-hover:bg-skybrand-500 group-hover:text-white flex items-center justify-center transition-colors duration-200 mb-6"
+            >
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+            <h3 class="text-lg font-bold text-navy mb-2">
+              รองรับทั้ง Windows และ macOS
+            </h3>
+            <p class="text-sm text-slate-600 leading-relaxed">
+              เปิดให้ดาวน์โหลดใช้งานได้ทั้งบน Windows และ macOS
+              ไม่ต้องลงระบบฐานข้อมูลเสริม มีหน้าต่างเมนูภาษาไทยใช้งานสะดวก
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works (Workflow Steps) -->
+    <section id="workflow" class="py-20 bg-white">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-16">
+          <span class="text-xs font-bold uppercase tracking-wider text-orange"
+            >ขั้นตอนการใช้งาน</span
+          >
+          <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-navy mt-2">
+            3 ขั้นตอนง่ายๆ ในการเริ่มใช้งาน LTax Auto
+          </h2>
+          <p class="text-sm sm:text-base text-slate-600 mt-3">
+            ดาวน์โหลดโปรแกรม สั่งซื้อหรือขอรับ License Key จากระบบจัดการ
+            และเริ่มประมวลผลข้อมูลได้ทันที
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+          <!-- Step 1 -->
+          <div
+            class="relative bg-slate-50 border border-slate-200 rounded-2xl p-7 flex flex-col justify-between"
+          >
+            <div>
+              <div class="flex items-center justify-between mb-6">
+                <span
+                  class="w-10 h-10 rounded-xl bg-navy text-white font-mono font-bold flex items-center justify-center text-lg"
+                  >01</span
+                >
+                <span
+                  class="text-xs font-semibold px-2.5 py-1 rounded bg-skybrand-100 text-navy"
+                  >ดาวน์โหลด</span
+                >
+              </div>
+              <h3 class="text-lg font-bold text-navy mb-2">ดาวน์โหลดโปรแกรม</h3>
+              <p class="text-sm text-slate-600 leading-relaxed">
+                ดาวน์โหลดไฟล์เวอร์ชันล่าสุดผ่านศูนย์ดาวน์โหลด (รองรับ Windows
+                และ macOS) แตกไฟล์ Zip พร้อมเปิดใช้งานได้ทันที
+              </p>
+            </div>
+            <div
+              class="mt-6 pt-4 border-t border-slate-200 text-xs text-slate-500"
+            >
+              ไม่ต้องติดตั้ง Database หรือโปรแกรมเสริม
+            </div>
+          </div>
+
+          <!-- Step 2 -->
+          <div
+            class="relative bg-slate-50 border-2 border-orange/40 rounded-2xl p-7 flex flex-col justify-between shadow-sm"
+          >
+            <div>
+              <div class="flex items-center justify-between mb-6">
+                <span
+                  class="w-10 h-10 rounded-xl bg-orange text-white font-mono font-bold flex items-center justify-center text-lg"
+                  >02</span
+                >
+                <span
+                  class="text-xs font-semibold px-2.5 py-1 rounded bg-orange-100 text-orange-700"
+                  >License Key</span
+                >
+              </div>
+              <h3 class="text-lg font-bold text-navy mb-2">
+                สั่งซื้อ & รับ License Key
+              </h3>
+              <p class="text-sm text-slate-600 leading-relaxed">
+                ติดต่อทีมงานหรือส่งแบบฟอร์มเพื่อขอใบเสนอราคา /
+                สั่งซื้อสิทธิ์การใช้งานสำหรับ อปท. ระบบจะออก License Key
+                ประจำหน่วยงานให้
+              </p>
+            </div>
+            <div
+              class="mt-6 pt-4 border-t border-slate-200 text-xs text-orange-600 font-medium"
+            >
+              จัดการสิทธิ์และส่งมอบรหัส License Key
+            </div>
+          </div>
+
+          <!-- Step 3 -->
+          <div
+            class="relative bg-slate-50 border border-slate-200 rounded-2xl p-7 flex flex-col justify-between"
+          >
+            <div>
+              <div class="flex items-center justify-between mb-6">
+                <span
+                  class="w-10 h-10 rounded-xl bg-navy text-white font-mono font-bold flex items-center justify-center text-lg"
+                  >03</span
+                >
+                <span
+                  class="text-xs font-semibold px-2.5 py-1 rounded bg-emerald-100 text-emerald-800"
+                  >เริ่มประมวลผล</span
+                >
+              </div>
+              <h3 class="text-lg font-bold text-navy mb-2">
+                เปิดโปรแกรมแล้วเริ่มทำงาน
+              </h3>
+              <p class="text-sm text-slate-600 leading-relaxed">
+                ใส่ License Key เข้าสู่โปรแกรม เลือกไฟล์ Excel ฐานข้อมูลภาษี
+                จากนั้นกดปุ่มเริ่มทำงาน
+                บอทจะจัดการคีย์ข้อมูลเข้าระบบให้เสร็จสมบูรณ์
+              </p>
+            </div>
+            <div
+              class="mt-6 pt-4 border-t border-slate-200 text-xs text-slate-500"
+            >
+              พร้อมสรุปรายงานการทำงาน แจ้งเตือนเมื่อทำงานเสร็จสิ้น
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Live Releases & Download Section (Connected to License Server API) -->
+    <section
+      id="downloads"
+      class="py-20 bg-gradient-to-b from-slate-50 to-skybrand-50/50 border-t border-slate-200"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-14">
+          <span class="text-xs font-bold uppercase tracking-wider text-orange"
+            >ศูนย์ดาวน์โหลดซอฟต์แวร์</span
+          >
+          <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-navy mt-2">
+            ดาวน์โหลด LTax Auto เวอร์ชันล่าสุด
+          </h2>
+          <p class="text-sm sm:text-base text-slate-600 mt-3">
+            รองรับทั้งระบบปฏิบัติการ Windows และ macOS
+            อัปเดตข้อมูลอัตโนมัติจากเซิร์ฟเวอร์
+          </p>
+        </div>
+
+        <!-- Release Dashboard Container -->
+        <div
+          class="max-w-4xl mx-auto bg-white rounded-3xl border border-slate-200/90 shadow-isometric-lg overflow-hidden"
+        >
+          <!-- Release Header Bar -->
+          <div
+            class="bg-navy p-6 sm:p-8 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+          >
+            <div class="flex items-center gap-4">
+              <div
+                class="w-14 h-14 rounded-2xl bg-white/10 p-2.5 flex items-center justify-center shrink-0 border border-white/10"
+              >
+                <img
+                  src="assets/logo.png"
+                  alt="LTax Auto"
+                  class="w-full h-full object-contain"
+                />
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <h3 class="text-xl sm:text-2xl font-bold">LTax Auto</h3>
+                  <span
+                    id="latestVersionBadge"
+                    class="px-2.5 py-0.5 rounded-full text-xs font-mono font-semibold bg-orange text-white"
+                  >
+                    v1.2.3 (Latest)
+                  </span>
+                </div>
+                <p class="text-xs text-slate-300 mt-1" id="releaseDateText">
+                  เผยแพร่เมื่อ: 25 ตุลาคม 2026 | รองรับ Windows 10/11 & macOS
+                </p>
+              </div>
+            </div>
+
+            <!-- Live Server Sync Indicator -->
+            <div
+              class="flex items-center gap-2 bg-navy-900/60 border border-white/10 px-3 py-1.5 rounded-xl text-xs text-slate-300"
+            >
+              <span
+                id="apiStatusDot"
+                class="w-2 h-2 rounded-full bg-emerald-400"
+              ></span>
+              <span id="apiStatusText">License Server: พร้อมใช้งาน</span>
+            </div>
+          </div>
+
+          <!-- Release Content & Action Grid -->
+          <div class="p-6 sm:p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <!-- Left: Download Options for Windows & macOS -->
+              <div class="lg:col-span-7 space-y-4">
+                <h4
+                  class="text-sm font-bold text-navy uppercase tracking-wider"
+                >
+                  เลือกแพ็กเกจตามระบบปฏิบัติการ
+                </h4>
+
+                <!-- Download Card 1: Windows Package -->
+                <div
+                  class="p-4 rounded-2xl border border-slate-200 hover:border-orange/60 bg-slate-50/60 hover:bg-orange-50/20 transition-all duration-200 flex items-center justify-between gap-4"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-xl bg-navy/10 text-navy flex items-center justify-center font-bold"
+                    >
+                      <!-- Windows SVG Icon -->
+                      <svg
+                        class="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4h-13.051M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.949-1.949"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="text-sm font-bold text-navy">
+                        สำหรับ Windows (.zip)
+                      </div>
+                      <div class="text-xs text-slate-500" id="winMetaText">
+                        Windows 10 / 11 (64-bit) | ~81.3 MB
+                      </div>
+                    </div>
+                  </div>
+                  <a
+                    id="btnDownloadWin"
+                    href="https://ltaxauto-license-server-manager.vercel.app/api/v1/app/download/windows?tag=v1.2.3"
+                    class="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-white bg-orange hover:bg-orange-600 rounded-xl shadow-sm transition-all duration-200 cursor-pointer shrink-0"
+                  >
+                    <svg
+                      class="w-3.5 h-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      />
+                    </svg>
+                    <span id="btnDownloadWinLabel">ดาวน์โหลด Windows</span>
+                  </a>
+                </div>
+
+                <!-- Download Card 2: macOS Package -->
+                <div
+                  class="p-4 rounded-2xl border border-slate-200 hover:border-skybrand-500 bg-slate-50/60 hover:bg-skybrand-50/30 transition-all duration-200 flex items-center justify-between gap-4"
+                >
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-10 h-10 rounded-xl bg-skybrand-200/60 text-navy flex items-center justify-center font-bold"
+                    >
+                      <!-- Apple SVG Icon -->
+                      <svg
+                        class="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.89c.63-.78 1.07-1.85.94-2.94-.92.05-2.02.63-2.67 1.4-.58.68-1.09 1.77-.95 2.83 1.02.08 2.05-.51 2.68-1.29z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="text-sm font-bold text-navy">
+                        สำหรับ macOS (.zip)
+                      </div>
+                      <div class="text-xs text-slate-500" id="macMetaText">
+                        macOS (Intel & Apple Silicon) | ~73.5 MB
+                      </div>
+                    </div>
+                  </div>
+                  <a
+                    id="btnDownloadMac"
+                    href="https://ltaxauto-license-server-manager.vercel.app/api/v1/app/download/macos?tag=v1.2.3"
+                    class="inline-flex items-center gap-1.5 px-4 py-2.5 text-xs font-bold text-navy bg-slate-100 hover:bg-slate-200 rounded-xl border border-slate-200 transition-all duration-200 cursor-pointer shrink-0"
+                  >
+                    <svg
+                      class="w-3.5 h-3.5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                      />
+                    </svg>
+                    <span id="btnDownloadMacLabel">ดาวน์โหลด macOS</span>
+                  </a>
+                </div>
+
+                <!-- License Key Notice Banner inside Download -->
+                <div
+                  class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-start gap-2.5"
+                >
+                  <svg
+                    class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <div>
+                    <strong>ข้อควรรู้ก่อนเปิดโปรแกรม:</strong>
+                    เมื่อดาวน์โหลดและแตกไฟล์แล้ว จะต้องนำ
+                    <strong>License Key</strong>
+                    ที่ได้รับจากการสั่งซื้อมาลงทะเบียนในโปรแกรมเพื่อเริ่มต้นใช้งาน
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Changelog / Release Notes -->
+              <div
+                class="lg:col-span-5 bg-slate-50 rounded-2xl p-5 border border-slate-200 flex flex-col justify-between"
+              >
+                <div>
+                  <h4
+                    class="text-xs font-bold text-navy uppercase tracking-wider mb-3 flex items-center gap-2"
+                  >
+                    <svg
+                      class="w-4 h-4 text-orange"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      />
+                    </svg>
+                    <span>บันทึกการปรับปรุง (Changelog)</span>
+                  </h4>
+
+                  <div
+                    id="changelogContent"
+                    class="text-xs text-slate-600 space-y-2 leading-relaxed font-mono"
+                  >
+                    <p class="font-medium text-navy font-sans">
+                      • อัปเดตเอนจินการนำเข้าแปลงที่ดินและสิ่งปลูกสร้าง
+                    </p>
+                    <p class="font-sans">
+                      • ปรับปรุงความเสถียรของระบบ Auto-Resume
+                    </p>
+                  </div>
+                </div>
+
+                <!-- Version History Accordion / Dropdown -->
+                <div class="mt-6 pt-3 border-t border-slate-200">
+                  <label
+                    for="versionSelector"
+                    class="block text-[11px] font-semibold text-navy mb-1.5"
+                    >ประวัติเวอร์ชัน (Version History)</label
+                  >
+                  <select
+                    id="versionSelector"
+                    class="w-full text-xs px-3 py-2 bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-orange font-mono cursor-pointer"
+                  >
+                    <option value="0">v1.2.3 (ล่าสุด)</option>
+                    <option value="1">v1.2.2</option>
+                    <option value="2">v1.2.1</option>
+                    <option value="3">v1.2.0</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- License Key Acquisition & Quotation Section -->
+    <section id="key-request" class="py-20 bg-white relative">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          class="bg-gradient-to-br from-navy to-navy-900 rounded-3xl p-8 sm:p-12 text-white shadow-isometric-lg relative overflow-hidden"
+        >
+          <!-- Background Geometric Glow -->
+          <div
+            class="absolute -right-20 -bottom-20 w-80 h-80 bg-orange/20 rounded-full blur-3xl pointer-events-none"
+          ></div>
+          <div
+            class="absolute -left-20 -top-20 w-80 h-80 bg-skybrand/20 rounded-full blur-3xl pointer-events-none"
+          ></div>
+
+          <div
+            class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center relative z-10"
+          >
+            <!-- Left: Instructions on License & Enterprise Package -->
+            <div class="lg:col-span-6 space-y-5">
+              <div
+                class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange/20 border border-orange/40 text-orange-400 text-xs font-semibold"
+              >
+                <span>ระบบจัดการสิทธิ์ License Key</span>
+              </div>
+              <h2 class="text-2xl sm:text-3xl font-bold tracking-tight">
+                สั่งซื้อ License Key หรือขอใบเสนอราคาสำหรับ อปท.
+              </h2>
+              <p
+                class="text-sm sm:text-base text-slate-300 leading-relaxed font-light"
+              >
+                โปรแกรม LTax Auto ทำงานร่วมกับระบบ
+                <strong>LTaxAuto License Server Manager</strong>
+                เพื่อออกรหัสอนุญาตใช้งาน (License Key) ประจำหน่วยงาน
+                พร้อมบริการดูแล ซัพพอร์ตการติดตั้ง
+                และอัปเดตระบบให้สอดคล้องกับการเปลี่ยนแปลงของ LTAX Online
+                ตลอดรอบปีภาษี
+              </p>
+
+              <div class="space-y-3 pt-2">
+                <div class="flex items-center gap-3 text-sm text-slate-200">
+                  <svg
+                    class="w-5 h-5 text-emerald-400 shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span
+                    >ออกเอกสารใบเสนอราคาสำหรับเบิกจ่ายงบประมาณ อปท. ได้</span
+                  >
+                </div>
+                <div class="flex items-center gap-3 text-sm text-slate-200">
+                  <svg
+                    class="w-5 h-5 text-emerald-400 shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span
+                    >เลือกแพ็กเกจตามจำนวนเครื่องหรือสิทธิ์ใช้งานระดับ อปท.</span
+                  >
+                </div>
+                <div class="flex items-center gap-3 text-sm text-slate-200">
+                  <svg
+                    class="w-5 h-5 text-emerald-400 shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M10 18a8 8 0 100-16 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span
+                    >ทีมงานผู้พัฒนาคอยดูแล ให้คำแนะนำ
+                    และช่วยตั้งค่าทางเทคนิค</span
+                  >
+                </div>
+              </div>
+
+              <!-- Direct Contact Channels (Phone & Facebook) -->
+              <div class="pt-5 border-t border-white/15">
+                <div
+                  class="text-xs font-semibold text-slate-300 uppercase tracking-wider mb-3"
+                >
+                  หรือติดต่อสั่งซื้อ / สอบถามเร่งด่วน:
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <!-- Phone Direct Card -->
+                  <a
+                    href="tel:0891234567"
+                    class="flex items-center gap-3 p-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 transition-all duration-200 group cursor-pointer"
+                  >
+                    <div
+                      class="w-10 h-10 rounded-xl bg-orange text-white flex items-center justify-center shrink-0 shadow-sm"
+                    >
+                      <svg
+                        class="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                          stroke-width="2"
+                          d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="text-[11px] text-slate-300">
+                        โทรเลย
+                      </div>
+                      <div
+                        class="text-xs font-bold text-white group-hover:text-orange-400 font-mono transition-colors"
+                      >
+                        098-637-1916
+                      </div>
+                    </div>
+                  </a>
+
+                  <!-- Facebook Direct Card -->
+                  <a
+                    href="https://facebook.com/I.Gis.Map.Traning"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center gap-3 p-3 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 transition-all duration-200 group cursor-pointer"
+                  >
+                    <div
+                      class="w-10 h-10 rounded-xl bg-[#1877F2] text-white flex items-center justify-center shrink-0 shadow-sm"
+                    >
+                      <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path
+                          d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <div class="text-[11px] text-slate-300">
+                        Facebook Page
+                      </div>
+                      <div
+                        class="text-xs font-bold text-white group-hover:text-skybrand-300 transition-colors"
+                      >
+                        fb.com/I-GIS-MAP
+                      </div>
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Direct Contact & Temporary Form Notice -->
+            <div
+              class="lg:col-span-6 bg-white rounded-2xl p-6 sm:p-8 text-navy shadow-isometric flex flex-col justify-between"
+            >
+              <div>
+                <!-- Notice Badge -->
+                <div
+                  class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold mb-4"
+                >
+                  <svg
+                    class="w-3.5 h-3.5 text-amber-600 shrink-0"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fill-rule="evenodd"
+                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                      clip-rule="evenodd"
+                    />
+                  </svg>
+                  <span>แบบฟอร์มปิดใช้งานชั่วคราว</span>
+                </div>
+
+                <h3 class="text-xl font-bold text-navy mb-2">
+                  ติดต่อขอใบเสนอราคา / สั่งซื้อสิทธิ์โดยตรง
+                </h3>
+                <p class="text-sm text-slate-600 leading-relaxed mb-6">
+                  ขณะนี้ระบบแบบฟอร์มออนไลน์ปิดให้บริการชั่วคราว เจ้าหน้าที่ อปท.
+                  หรือหน่วยงานที่ต้องการขอใบเสนอราคาเพื่อจัดซื้อจัดจ้าง
+                  หรือสั่งซื้อ License Key
+                  สามารถติดต่อทีมงานได้โดยตรงผ่านทางโทรศัพท์และ Facebook Page:
+                </p>
+
+                <!-- Direct Contact Actions Grid -->
+                <div class="space-y-3.5 mb-6">
+                  <!-- Phone Action Card -->
+                  <a
+                    href="tel:0986371916"
+                    class="flex items-center justify-between p-4 rounded-xl bg-orange-50/60 hover:bg-orange-50 border-2 border-orange/40 hover:border-orange transition-all duration-200 group cursor-pointer shadow-sm"
+                  >
+                    <div class="flex items-center gap-3.5">
+                      <div
+                        class="w-11 h-11 rounded-xl bg-orange text-white flex items-center justify-center shrink-0 shadow-sm"
+                      >
+                        <svg
+                          class="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="text-xs font-semibold text-slate-500">
+                          โทรเลย
+                        </div>
+                        <div
+                          class="text-base font-bold text-navy group-hover:text-orange font-mono transition-colors"
+                        >
+                          098-637-1916
+                        </div>
+                      </div>
+                    </div>
+                    <span
+                      class="text-xs font-bold text-orange px-3 py-1.5 rounded-lg bg-white border border-orange/30 group-hover:bg-orange group-hover:text-white transition-all"
+                    >
+                      โทรเลย
+                    </span>
+                  </a>
+
+                  <!-- Facebook Action Card -->
+                  <a
+                    href="https://facebook.com/I.Gis.Map.Traning"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="flex items-center justify-between p-4 rounded-xl bg-blue-50/50 hover:bg-blue-50 border-2 border-blue-200 hover:border-[#1877F2] transition-all duration-200 group cursor-pointer shadow-sm"
+                  >
+                    <div class="flex items-center gap-3.5">
+                      <div
+                        class="w-11 h-11 rounded-xl bg-[#1877F2] text-white flex items-center justify-center shrink-0 shadow-sm"
+                      >
+                        <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                          <path
+                            d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                          />
+                        </svg>
+                      </div>
+                      <div>
+                        <div class="text-xs font-semibold text-slate-500">
+                          Facebook Page (อินบ็อกซ์ตลอด 24 ชม.)
+                        </div>
+                        <div
+                          class="text-base font-bold text-navy group-hover:text-[#1877F2] transition-colors"
+                        >
+                          fb.com/I-GIS-MAP
+                        </div>
+                      </div>
+                    </div>
+                    <span
+                      class="text-xs font-bold text-[#1877F2] px-3 py-1.5 rounded-lg bg-white border border-blue-200 group-hover:bg-[#1877F2] group-hover:text-white transition-all"
+                    >
+                      ทักแชต
+                    </span>
+                  </a>
+                </div>
+              </div>
+
+              <!-- Extra Note on Procurement / Fast Processing -->
+              <div
+                class="pt-4 border-t border-slate-100 flex items-start gap-2.5 text-xs text-slate-500"
+              >
+                <svg
+                  class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                <span
+                  >ทีมงานพร้อมออกใบเสนอราคาอย่างเป็นทางการและส่งเอกสารให้ทางอีเมลหรือแชต
+                  เพื่อความรวดเร็วในการจัดซื้อจัดจ้างของหน่วยงาน</span
+                >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 bg-slate-50">
+      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-14">
+          <span class="text-xs font-bold uppercase tracking-wider text-orange"
+            >ข้อสงสัยที่พบบ่อย</span
+          >
+          <h2 class="text-2xl sm:text-3xl font-bold text-navy mt-2">
+            คำถามที่พบบ่อย (FAQ)
+          </h2>
+          <p class="text-sm text-slate-600 mt-2">
+            รวบรวมข้อสงสัยเกี่ยวกับการทำงาน การคิดค่าบริการ และการนำไปใช้ใน อปท.
+          </p>
+        </div>
+
+        <div class="space-y-4">
+          <!-- FAQ Item 1 -->
+          <details
+            class="group bg-white rounded-2xl border border-slate-200/90 p-5 open:shadow-sm cursor-pointer transition-all duration-200"
+          >
+            <summary
+              class="flex items-center justify-between font-bold text-navy text-sm sm:text-base list-none"
+            >
+              <span>1. โปรแกรมมีรูปแบบค่าบริการและ License Key อย่างไร?</span>
+              <span
+                class="ml-4 w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center group-open:rotate-180 transition-transform duration-200 text-slate-500"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </span>
+            </summary>
+            <div
+              class="text-sm text-slate-600 mt-4 pt-3 border-t border-slate-100 leading-relaxed font-normal"
+            >
+              ตัวโปรแกรมสามารถดาวน์โหลดและติดตั้งได้ทันที
+              โดยการประมวลผลจำเป็นต้องใช้ License Key เพื่อเปิดใช้งานระบบ
+              มีแพ็กเกจทั้งแบบรายเครื่องและแบบประจำ อปท.
+              พร้อมออกใบเสนอราคาและเอกสารสำหรับจัดซื้อจัดจ้างตามระเบียบพัสดุได้ครับ
+            </div>
+          </details>
+
+          <!-- FAQ Item 2 -->
+          <details
+            class="group bg-white rounded-2xl border border-slate-200/90 p-5 open:shadow-sm cursor-pointer transition-all duration-200"
+          >
+            <summary
+              class="flex items-center justify-between font-bold text-navy text-sm sm:text-base list-none"
+            >
+              <span
+                >2.
+                ข้อมูลภาษีและทรัพย์สินของประชาชนจะหลุดออกภายนอกหรือไม่?</span
+              >
+              <span
+                class="ml-4 w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center group-open:rotate-180 transition-transform duration-200 text-slate-500"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </span>
+            </summary>
+            <div
+              class="text-sm text-slate-600 mt-4 pt-3 border-t border-slate-100 leading-relaxed font-normal"
+            >
+              ไม่หลุดอย่างแน่นอนครับ ตัวโปรแกรมทำงานแบบ Local Execution
+              บนเครื่องคอมพิวเตอร์ของคุณเท่านั้น โดยส่งข้อมูลไปยังระบบ LTAX
+              Online โดยตรง เสมือนคุณกำลังนั่งคีย์หน้าจอด้วยตัวเอง
+              ไม่มีการส่งข้อมูลสำคัญเข้าเซิร์ฟเวอร์ภายนอกอื่นใด
+            </div>
+          </details>
+
+          <!-- FAQ Item 3 -->
+          <details
+            class="group bg-white rounded-2xl border border-slate-200/90 p-5 open:shadow-sm cursor-pointer transition-all duration-200"
+          >
+            <summary
+              class="flex items-center justify-between font-bold text-navy text-sm sm:text-base list-none"
+            >
+              <span>3. รูปแบบไฟล์ Excel ต้องจัดเตรียมอย่างไร?</span>
+              <span
+                class="ml-4 w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center group-open:rotate-180 transition-transform duration-200 text-slate-500"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </span>
+            </summary>
+            <div
+              class="text-sm text-slate-600 mt-4 pt-3 border-t border-slate-100 leading-relaxed font-normal"
+            >
+              โปรแกรมมี Template ไฟล์ Excel มาตรฐานให้ในตัว
+              และรองรับไฟล์สำรวจข้อมูลภาษีที่ดินและสิ่งปลูกสร้าง (ภ.ด.ส.1,
+              ภ.ด.ส.3) ทั่วไปของ อปท. ได้ทันที
+            </div>
+          </details>
+
+          <!-- FAQ Item 4 -->
+          <details
+            class="group bg-white rounded-2xl border border-slate-200/90 p-5 open:shadow-sm cursor-pointer transition-all duration-200"
+          >
+            <summary
+              class="flex items-center justify-between font-bold text-navy text-sm sm:text-base list-none"
+            >
+              <span
+                >4. หากระบบ LTAX Online มีการปรับปรุงหน้าตา
+                โปรแกรมจะยังใช้ได้ไหม?</span
+              >
+              <span
+                class="ml-4 w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center group-open:rotate-180 transition-transform duration-200 text-slate-500"
+              >
+                <svg
+                  class="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </span>
+            </summary>
+            <div
+              class="text-sm text-slate-600 mt-4 pt-3 border-t border-slate-100 leading-relaxed font-normal"
+            >
+              ทีมผู้พัฒนาติดตามการเปลี่ยนแปลงของ LTAX Online อย่างต่อเนื่อง
+              หากมีการอัปเดตระบบหลัก
+              ทีมงานจะออกแพตช์อัปเดตเวอร์ชันใหม่ผ่านระบบดาวน์โหลดให้ผู้ถือสิทธิ์
+              License ใช้งานได้อย่างต่อเนื่อง
+            </div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact & Community Section (FB, LINE, Phone) -->
+    <section id="contact" class="py-20 bg-white border-t border-slate-200">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center max-w-3xl mx-auto mb-14">
+          <span class="text-xs font-bold uppercase tracking-wider text-orange"
+            >ช่องทางการติดต่อและสนับสนุน</span
+          >
+          <h2 class="text-2xl sm:text-3xl md:text-4xl font-bold text-navy mt-2">
+            ติดต่อทีมงาน LTax Auto
+          </h2>
+          <p class="text-sm sm:text-base text-slate-600 mt-3">
+            ต้องการความช่วยเหลือในการติดตั้ง สั่งซื้อ License Key
+            หรือขอใบเสนอราคา ติดต่อเราได้ทุกช่องทาง
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- LINE Card -->
+          <div
+            class="bg-emerald-50/50 rounded-2xl p-7 border border-emerald-200 flex flex-col justify-between items-center text-center shadow-sm hover:shadow-isometric transition-all duration-200"
+          >
+            <div
+              class="w-14 h-14 rounded-2xl bg-[#06C755] text-white flex items-center justify-center mb-4 shadow-md"
+            >
+              <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24">
+                <path
+                  d="M24 10.304c0-5.369-5.383-9.738-12-9.738-6.616 0-12 4.369-12 9.738 0 4.814 4.269 8.846 10.019 9.578.39.082.923.253 1.058.58.12.295.079.757.039 1.056l-.169 1.018c-.052.308-.246 1.207 1.057.658 1.303-.55 7.034-4.144 9.599-7.095 1.637-1.802 2.397-3.639 2.397-5.797zm-14.733 2.122h-1.838v-4.85h1.838v4.85zm3.626 0h-1.838v-4.85h1.838v4.85zm5.797 0h-1.838l-2.457-3.238v3.238h-1.838v-4.85h1.838l2.457 3.238v-3.238h1.838v4.85zm3.626-3.155h-2.128v1.171h2.128v1.984h-3.966v-4.85h3.966v1.695z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-navy">LINE Official Account</h3>
+              <p class="text-xs text-slate-500 mt-1 mb-4">
+                ช่องทางเร็วที่สุดสำหรับสั่งซื้อ Key และปรึกษาการติดตั้ง
+              </p>
+              <div
+                class="inline-block px-3 py-1 bg-white border border-emerald-300 rounded-lg text-xs font-mono font-bold text-emerald-800 mb-4"
+              >
+                ID: @
+              </div>
+            </div>
+            <a
+              href="https://line.me"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="w-full py-2.5 px-4 bg-[#06C755] hover:bg-[#05b34c] text-white text-xs font-bold rounded-xl transition-colors duration-200 cursor-pointer flex items-center justify-center gap-2"
+            >
+              <span>เพิ่มเพื่อนผ่าน LINE</span>
+            </a>
+          </div>
+
+          <!-- Facebook Page Card -->
+          <div
+            class="bg-blue-50/50 rounded-2xl p-7 border border-blue-200 flex flex-col justify-between items-center text-center shadow-sm hover:shadow-isometric transition-all duration-200"
+          >
+            <div
+              class="w-14 h-14 rounded-2xl bg-[#1877F2] text-white flex items-center justify-center mb-4 shadow-md"
+            >
+              <svg class="w-8 h-8 fill-current" viewBox="0 0 24 24">
+                <path
+                  d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-navy">Facebook Page</h3>
+              <p class="text-xs text-slate-500 mt-1 mb-4">
+                ติดตามข่าวสาร อัปเดตเวอร์ชันใหม่ และทริกการใช้งาน
+              </p>
+              <div
+                class="inline-block px-3 py-1 bg-white border border-blue-300 rounded-lg text-xs font-bold text-blue-800 mb-4"
+              >
+                fb.com/I-GIS-MAP
+              </div>
+            </div>
+            <a
+              href="https://www.facebook.com/I.Gis.Map.Traning"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="w-full py-2.5 px-4 bg-[#1877F2] hover:bg-[#0f66d8] text-white text-xs font-bold rounded-xl transition-colors duration-200 cursor-pointer flex items-center justify-center gap-2"
+            >
+              <span>ไปที่ Facebook Page</span>
+            </a>
+          </div>
+
+          <!-- Phone Hotline Card -->
+          <div
+            class="bg-orange-50/50 rounded-2xl p-7 border border-orange-200 flex flex-col justify-between items-center text-center shadow-sm hover:shadow-isometric transition-all duration-200"
+          >
+            <div
+              class="w-14 h-14 rounded-2xl bg-orange text-white flex items-center justify-center mb-4 shadow-md"
+            >
+              <svg
+                class="w-8 h-8"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-navy">สายด่วนให้คำปรึกษา</h3>
+              <p class="text-xs text-slate-500 mt-1 mb-4">
+                สำหรับเจ้าหน้าที่ อปท. ที่ต้องการปรึกษาเร่งด่วน
+              </p>
+              <div
+                class="inline-block px-3 py-1 bg-white border border-orange-300 rounded-lg text-sm font-mono font-bold text-orange mb-4"
+              >
+                098-637-1916
+              </div>
+            </div>
+            <a
+              href="tel:0891234567"
+              class="w-full py-2.5 px-4 bg-navy hover:bg-navy-900 text-white text-xs font-bold rounded-xl transition-colors duration-200 cursor-pointer flex items-center justify-center gap-2"
+            >
+              <span>โทรติดต่อทันที</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer
+      class="bg-navy-950 text-slate-400 text-xs py-12 border-t border-navy-800"
+    >
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div
+          class="flex flex-col md:flex-row items-center justify-between gap-6 pb-8 border-b border-navy-800"
+        >
+          <div class="flex items-center gap-3">
+            <img
+              src="assets/logo.png"
+              alt="LTax Auto Logo"
+              class="w-8 h-8 object-contain"
+            />
+            <span class="text-base font-bold text-white tracking-tight"
+              >LTax Auto</span
+            >
+            <span class="text-slate-500">|</span>
+            <span class="text-slate-400"
+              >ซอฟต์แวร์สนับสนุนงานภาษีที่ดินและสิ่งปลูกสร้าง สำหรับ อปท.</span
+            >
+          </div>
+          <div class="flex items-center gap-6">
+            <a href="#features" class="hover:text-white transition-colors"
+              >ฟีเจอร์</a
+            >
+            <a href="#downloads" class="hover:text-white transition-colors"
+              >ดาวน์โหลด</a
+            >
+            <a href="#key-request" class="hover:text-white transition-colors"
+              >สั่งซื้อ License</a
+            >
+            <a href="#contact" class="hover:text-white transition-colors"
+              >ติดต่อเรา</a
+            >
+            <a
+              href="https://github.com/fxurteenz"
+              target="_blank"
+              class="hover:text-white transition-colors"
+              >GitHub</a
+            >
+          </div>
+        </div>
+
+        <div
+          class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-slate-500"
+        >
+          <p>
+            © 2026 LTax Auto Project. สงวนลิขสิทธิ์
+            ซอฟต์แวร์นี้พัฒนาขึ้นเพื่อสนับสนุนงานจัดเก็บรายได้ภาษีที่ดินและสิ่งปลูกสร้าง
+          </p>
+          <p>ระบบ License Manager บริหารจัดการโดยทีมงานผู้พัฒนา LTax Auto</p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- Interactive Client-side Script: Parallax, API Releases Fetcher, Form Handler -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // 1. Mouse & Scroll Parallax Effect
+        const parallaxLayers = document.querySelectorAll(".parallax-layer");
+        const heroBoard = document.getElementById("isometricHeroCard");
+
+        const prefersReducedMotion = window.matchMedia(
+          "(prefers-reduced-motion: reduce)",
+        ).matches;
+
+        if (!prefersReducedMotion) {
+          // Subtle Mousemove Parallax for Hero Isometric Board
+          window.addEventListener(
+            "mousemove",
+            (e) => {
+              const { clientX, clientY } = e;
+              const xCenter = window.innerWidth / 2;
+              const yCenter = window.innerHeight / 2;
+              const deltaX = (clientX - xCenter) / xCenter;
+              const deltaY = (clientY - yCenter) / yCenter;
+
+              if (heroBoard) {
+                const rotX = 24 - deltaY * 8;
+                const rotZ = -18 + deltaX * 6;
+                heroBoard.style.transform = `rotateX(${rotX}deg) rotateZ(${rotZ}deg) rotateY(${deltaX * 4}deg)`;
+              }
+
+              parallaxLayers.forEach((layer) => {
+                const speed = parseFloat(
+                  layer.getAttribute("data-parallax-speed") || "0.05",
+                );
+                const xOffset = deltaX * speed * 80;
+                const yOffset = deltaY * speed * 80;
+                layer.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+              });
+            },
+            { passive: true },
+          );
+
+          // Scroll Parallax
+          window.addEventListener(
+            "scroll",
+            () => {
+              const scrollY = window.scrollY;
+              parallaxLayers.forEach((layer) => {
+                const speed = parseFloat(
+                  layer.getAttribute("data-parallax-speed") || "0.05",
+                );
+                layer.style.transform = `translateY(${scrollY * speed * 0.5}px)`;
+              });
+            },
+            { passive: true },
+          );
+        }
+
+        // 2. Dynamic Release Fetcher from Custom API
+        const API_ENDPOINT =
+          "https://ltaxauto-license-server-manager.vercel.app/api/v1/app/releases";
+
+        const latestVersionBadge =
+          document.getElementById("latestVersionBadge");
+        const releaseDateText = document.getElementById("releaseDateText");
+        const apiStatusDot = document.getElementById("apiStatusDot");
+        const apiStatusText = document.getElementById("apiStatusText");
+        const btnDownloadWin = document.getElementById("btnDownloadWin");
+        const btnDownloadMac = document.getElementById("btnDownloadMac");
+        const btnDownloadWinLabel = document.getElementById(
+          "btnDownloadWinLabel",
+        );
+        const btnDownloadMacLabel = document.getElementById(
+          "btnDownloadMacLabel",
+        );
+        const winMetaText = document.getElementById("winMetaText");
+        const macMetaText = document.getElementById("macMetaText");
+        const changelogContent = document.getElementById("changelogContent");
+        const versionSelector = document.getElementById("versionSelector");
+
+        let allReleases = [];
+
+        function formatBytes(bytes) {
+          if (!bytes || bytes === 0) return "0 MB";
+          return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+        }
+
+        function formatDate(isoStr) {
+          try {
+            const d = new Date(isoStr);
+            return d.toLocaleDateString("th-TH", {
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            });
+          } catch {
+            return isoStr;
+          }
+        }
+
+        function renderRelease(rel) {
+          if (!rel) return;
+
+          latestVersionBadge.textContent = `${rel.tag_name || "v" + rel.version} ${rel.is_latest ? "(ล่าสุด)" : ""}`;
+          releaseDateText.textContent = `เผยแพร่เมื่อ: ${formatDate(rel.published_at)} | รองรับ Windows 10/11 & macOS`;
+
+          // Platforms Data
+          const winData = rel.platforms?.windows;
+          const macData = rel.platforms?.macos;
+
+          if (winData) {
+            btnDownloadWin.href = winData.download_url;
+            btnDownloadWinLabel.textContent = `ดาวน์โหลด Windows (${formatBytes(winData.size)})`;
+            winMetaText.textContent = `Windows 10 / 11 (64-bit) | ${formatBytes(winData.size)}`;
+          }
+
+          if (macData) {
+            btnDownloadMac.href = macData.download_url;
+            btnDownloadMacLabel.textContent = `ดาวน์โหลด macOS (${formatBytes(macData.size)})`;
+            macMetaText.textContent = `macOS (Intel & Apple Silicon) | ${formatBytes(macData.size)}`;
+          }
+
+          // Changelog rendering
+          if (rel.release_notes) {
+            const lines = rel.release_notes
+              .split("\n")
+              .filter((l) => l.trim().length > 0);
+            let html = "";
+            lines.forEach((line) => {
+              if (line.startsWith("*") || line.startsWith("-")) {
+                html += `<p class="font-sans font-medium text-navy">• ${line.replace(/^[-*]\s*/, "")}</p>`;
+              } else if (line.startsWith("##")) {
+                html += `<p class="font-sans font-bold text-navy mt-2 mb-1">${line.replace(/^##\s*/, "")}</p>`;
+              } else if (line.includes("http")) {
+                html += `<p class="text-[11px] text-slate-500 break-all font-mono">${line}</p>`;
+              } else {
+                html += `<p class="font-sans text-slate-600">${line}</p>`;
+              }
+            });
+            changelogContent.innerHTML = html;
+          }
+        }
+
+        async function fetchReleases() {
+          apiStatusDot.className =
+            "w-2 h-2 rounded-full bg-amber-400 animate-pulse";
+          apiStatusText.textContent = "กำลังโหลดรายการเวอร์ชัน...";
+
+          try {
+            const response = await fetch(API_ENDPOINT);
+            if (!response.ok) {
+              throw new Error(`Server returned HTTP ${response.status}`);
+            }
+
+            const json = await response.json();
+            if (
+              json.success &&
+              Array.isArray(json.releases) &&
+              json.releases.length > 0
+            ) {
+              allReleases = json.releases;
+
+              // Populate version selector
+              versionSelector.innerHTML = allReleases
+                .map(
+                  (r, i) => `
+                            <option value="${i}">${r.tag_name || "v" + r.version} ${r.is_latest ? "(ล่าสุด)" : ""}</option>
+                        `,
+                )
+                .join("");
+
+              // Render latest
+              renderRelease(allReleases[0]);
+
+              apiStatusDot.className = "w-2 h-2 rounded-full bg-emerald-400";
+              apiStatusText.textContent = `เชื่อมต่อสำเร็จ (${allReleases.length} เวอร์ชัน)`;
+            } else {
+              throw new Error("Invalid payload structure");
+            }
+          } catch (err) {
+            console.warn("Release API fetch notice:", err.message);
+            apiStatusDot.className = "w-2 h-2 rounded-full bg-emerald-500";
+            apiStatusText.textContent = "แสดงข้อมูล v1.2.3 ล่าสุด";
+          }
+        }
+
+        versionSelector?.addEventListener("change", (e) => {
+          const idx = parseInt(e.target.value, 10);
+          if (allReleases[idx]) {
+            renderRelease(allReleases[idx]);
+          }
+        });
+
+        // Initial fetch
+        fetchReleases();
+
+        // 3. Form Handling for Key Request / Quotation
+        const form = document.getElementById("keyRequestForm");
+        const alert = document.getElementById("formSuccessAlert");
+
+        form?.addEventListener("submit", (e) => {
+          e.preventDefault();
+          alert.classList.remove("hidden");
+          form.reset();
+          setTimeout(() => {
+            alert.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }, 100);
+        });
+      });
+    </script>
+  </body>
 </html>
